@@ -88,3 +88,4 @@ def delete_coefficient(model_name: str, db: Session = Depends(get_db), current_u
 def post_data(node_name: str, data: dict, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
     response_code = post_to_onem2m(node_name, data, db, current_user)
     return {"response_code": response_code}
+
