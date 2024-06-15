@@ -18,7 +18,7 @@ def post_to_onem2m(node_name, data, db, current_user):
     compensated_tds= (float(coefficients[0])*compensated_voltage**3)- (float(coefficients[1])*compensated_voltage**2) + (float(coefficients[2])*compensated_voltage*0.5)
     print(compensated_tds)
     data_list = [epoch_time,temperature,compensated_voltage,compensated_tds]  # Initialize the data list with some default values
-    url = BACKEND_URL + node_name
+    url = BACKEND_URL + node_name + "/Data"
     data_list=str(data_list)
     payload = json.dumps({
         "m2m:cin": {
