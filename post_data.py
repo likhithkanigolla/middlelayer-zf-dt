@@ -5,7 +5,7 @@ from database import SessionLocal, ModelCoefficients, get_db, User
 # from config.settings import *
 
 # BACKEND_URL="http://onem2m.iiit.ac.in:443/~/in-cse/in-name/AE-DM/"
-BACKEND_URL="http://dev-onem2m.iiit.ac.in:443/~/in-cse/in-name/AE-CM/"
+BACKEND_URL="http://dev-onem2m.iiit.ac.in:443/~/in-cse/in-name/AE-WM/WM-WD/"
 
 def post_to_onem2m(node_name, data, db, current_user):
     epoch_time = int(time.time())
