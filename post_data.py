@@ -5,7 +5,7 @@ from database import SessionLocal, ModelCoefficients, get_db, User
 # from config.settings import *
 
 # BACKEND_URL="http://onem2m.iiit.ac.in:443/~/in-cse/in-name/AE-DM/"
-BACKEND_URL="http://dev-onem2m.iiit.ac.in:443/~/in-cse/in-name/AE-WM/WM-WD/"
+BACKEND_URL="http://dev-onem2m.iiit.ac.in:443/~/in-cse/in-name/"
 
 def post_to_onem2m_w1(node_name, data, db, current_user):
     epoch_time = int(time.time())
@@ -19,7 +19,7 @@ def post_to_onem2m_w1(node_name, data, db, current_user):
     compensated_tds= (float(coefficients[0])*compensated_voltage**3)- (float(coefficients[1])*compensated_voltage**2) + (float(coefficients[2])*compensated_voltage*0.5)
     print(compensated_tds)
     data_list = [epoch_time,temperature,compensated_voltage,uncompensated_tds,compensated_tds]  # Initialize the data list with some default values
-    url = BACKEND_URL + node_name + "/Data"
+    url = BACKEND_URL + "AE-WM/WM-WD/" + node_name + "/Data"
     data_list=str(data_list)
     payload = json.dumps({
         "m2m:cin": {
@@ -47,7 +47,7 @@ def post_to_onem2m_w2(node_name, data, db, current_user):
     compensated_tds= (float(coefficients[0])*compensated_voltage**3)- (float(coefficients[1])*compensated_voltage**2) + (float(coefficients[2])*compensated_voltage*0.5)
     print(compensated_tds)
     data_list = [epoch_time,temperature,compensated_voltage,uncompensated_tds,compensated_tds,turbudity,ph]  # Initialize the data list with some default values
-    url = BACKEND_URL + node_name + "/Data"
+    url = BACKEND_URL + "AE-WM/WM-WD/" + node_name + "/Data"
     data_list=str(data_list)
     payload = json.dumps({
         "m2m:cin": {
