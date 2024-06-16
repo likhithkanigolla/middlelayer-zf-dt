@@ -8,7 +8,7 @@ from database import SessionLocal, ModelCoefficients, get_db, User
 import models
 from auth import authenticate_user, create_access_token, get_current_active_user, oauth2_scheme  # Assuming your auth functions are in a separate file named auth.py
 import auth
-from post_data import post_to_onem2m
+from post_data import post_to_onem2m_w1,post_to_onem2m_w2
 
 app = FastAPI()
 
@@ -83,9 +83,15 @@ def delete_coefficient(model_name: str, db: Session = Depends(get_db), current_u
     db.commit()
     return db_coefficient
 
-@app.post("/post_data/{node_name}")
+@app.post("/post_data/w1/{node_name}")
 # parse the data from the request body json and send to the function
 def post_data(node_name: str, data: dict, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
-    response_code = post_to_onem2m(node_name, data, db, current_user)
+    response_code = post_to_onem2m_w1(node_name, data, db, current_user)
+    return {"response_code": response_code}
+
+@app.post("/post_data/w2/{node_name}")
+# parse the data from the request body json and send to the function
+def post_data(node_name: str, data: dict, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    response_code = post_to_onem2m_w2(node_name, data, db, current_user)
     return {"response_code": response_code}
 
