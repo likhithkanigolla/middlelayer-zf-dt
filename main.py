@@ -10,7 +10,11 @@ from auth import authenticate_user, create_access_token, get_current_active_user
 import auth
 from post_data import post_to_onem2m_w1,post_to_onem2m_w2
 
-app = FastAPI()
+app = FastAPI(
+    title="Digital Twin API for Callibration",
+    description="This layer and API's are used to callibrates the values and post them to the oneM2M",
+    version="1.0.0"
+)
 
 # Dependency
 def get_db():
@@ -22,6 +26,16 @@ def get_db():
 
 @app.post("/users/", response_model=models.User)
 def create_user(user: models.UserCreate, db: Session = Depends(get_db)):
+    """
+    Create a new user.
+
+    Parameters:
+    - user (models.UserCreate): The user data.
+    - db (Session): The database session.
+
+    Returns:
+    - models.User: The created user.
+    """
     hashed_password = auth.get_password_hash(user.password)
     db_user = User(username=user.username, hashed_password=hashed_password)
     db.add(db_user)
@@ -31,6 +45,19 @@ def create_user(user: models.UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/token", response_model=dict)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    Generate an access token for a user based on their username and password.
+
+    Parameters:
+    - form_data (OAuth2PasswordRequestForm): The form data containing the username and password.
+    - db (Session): The database session.
+
+    Returns:
+    - dict: A dictionary containing the access token and token type.
+
+    Raises:
+    - HTTPException: If the username or password is incorrect.
+    """
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -43,8 +70,20 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 # Existing endpoints with added authentication
+
 @app.post("/coefficients/", response_model=models.Coefficient)
 def create_coefficient(coefficient: models.CoefficientCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    """
+    Create a new coefficient.
+
+    Parameters:
+    - coefficient (models.CoefficientCreate): The coefficient data.
+    - db (Session): The database session.
+    - current_user (models.User): The current authenticated user.
+
+    Returns:
+    - models.Coefficient: The created coefficient.
+    """
     db_coefficient = ModelCoefficients(**coefficient.dict(by_alias=True))
     db.add(db_coefficient)
     db.commit()
@@ -53,11 +92,34 @@ def create_coefficient(coefficient: models.CoefficientCreate, db: Session = Depe
 
 @app.get("/coefficients/", response_model=List[models.Coefficient])
 def read_coefficients(skip: int = 0, limit: int = 10, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    """
+    Get a list of coefficients.
+
+    Parameters:
+    - skip (int): The number of coefficients to skip.
+    - limit (int): The maximum number of coefficients to return.
+    - db (Session): The database session.
+    - current_user (models.User): The current authenticated user.
+
+    Returns:
+    - List[models.Coefficient]: The list of coefficients.
+    """
     coefficients = db.query(ModelCoefficients).offset(skip).limit(limit).all()
     return coefficients
 
 @app.get("/coefficients/{model_name}", response_model=models.Coefficient)
 def read_coefficient(model_name: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    """
+    Get a coefficient by model name.
+
+    Parameters:
+    - model_name (str): The name of the model.
+    - db (Session): The database session.
+    - current_user (models.User): The current authenticated user.
+
+    Returns:
+    - models.Coefficient: The coefficient.
+    """
     coefficient = db.query(ModelCoefficients).filter(ModelCoefficients.model_name == model_name).first()
     if coefficient is None:
         raise HTTPException(status_code=404, detail="Model not found")
@@ -65,6 +127,18 @@ def read_coefficient(model_name: str, db: Session = Depends(get_db), current_use
 
 @app.put("/coefficients/{model_name}", response_model=models.Coefficient)
 def update_coefficient(model_name: str, coefficient: models.CoefficientUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    """
+    Update a coefficient by model name.
+
+    Parameters:
+    - model_name (str): The name of the model.
+    - coefficient (models.CoefficientUpdate): The updated coefficient data.
+    - db (Session): The database session.
+    - current_user (models.User): The current authenticated user.
+
+    Returns:
+    - models.Coefficient: The updated coefficient.
+    """
     db_coefficient = db.query(ModelCoefficients).filter(ModelCoefficients.model_name == model_name).first()
     if db_coefficient is None:
         raise HTTPException(status_code=404, detail="Model not found")
@@ -76,6 +150,17 @@ def update_coefficient(model_name: str, coefficient: models.CoefficientUpdate, d
 
 @app.delete("/coefficients/{model_name}", response_model=models.Coefficient)
 def delete_coefficient(model_name: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    """
+    Delete a coefficient by model name.
+
+    Parameters:
+    - model_name (str): The name of the model.
+    - db (Session): The database session.
+    - current_user (models.User): The current authenticated user.
+
+    Returns:
+    - models.Coefficient: The deleted coefficient.
+    """
     db_coefficient = db.query(ModelCoefficients).filter(ModelCoefficients.model_name == model_name).first()
     if db_coefficient is None:
         raise HTTPException(status_code=404, detail="Model not found")
@@ -84,14 +169,36 @@ def delete_coefficient(model_name: str, db: Session = Depends(get_db), current_u
     return db_coefficient
 
 @app.post("/post_data/w1/{node_name}")
-# parse the data from the request body json and send to the function
 def post_data(node_name: str, data: dict, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    """
+    Post data to OneM2M Water Quality Version 2.
+
+    Parameters:
+    - node_name (str): The name of the node.
+    - data (dict): The data to be posted.(voltage, temparature, u_tds)
+    - db (Session): The database session.
+    - current_user (models.User): The current authenticated user.
+
+    Returns:
+    - dict: A dictionary containing the response code.
+    """
     response_code = post_to_onem2m_w1(node_name, data, db, current_user)
     return {"response_code": response_code}
 
 @app.post("/post_data/w2/{node_name}")
-# parse the data from the request body json and send to the function
 def post_data(node_name: str, data: dict, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+    """
+    Post data to OneM2M Water Quality Version 2.
+
+    Parameters:
+    - node_name (str): The name of the node.
+    - data (dict): The data to be posted.(voltage,temparature, u_tds ,ph,turbudity)
+    - db (Session): The database session.
+    - current_user (models.User): The current authenticated user.
+
+    Returns:
+    - dict: A dictionary containing the response code.
+    """
     response_code = post_to_onem2m_w2(node_name, data, db, current_user)
     return {"response_code": response_code}
 
