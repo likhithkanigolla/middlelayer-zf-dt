@@ -4,8 +4,8 @@ import time
 from database import SessionLocal, ModelCoefficients, get_db, User
 # from config.settings import *
 
-# BACKEND_URL="http://onem2m.iiit.ac.in:443/~/in-cse/in-name/AE-DM/"
-BACKEND_URL="http://dev-onem2m.iiit.ac.in:443/~/in-cse/in-name/"
+BACKEND_URL="http://onem2m.iiit.ac.in:443/~/in-cse/in-name/"
+# BACKEND_URL="http://dev-onem2m.iiit.ac.in:443/~/in-cse/in-name/"
 
 def post_to_onem2m_w1(node_name, data, db, current_user):
     epoch_time = int(time.time())
@@ -27,7 +27,7 @@ def post_to_onem2m_w1(node_name, data, db, current_user):
         }
     })
     headers = {
-        'X-M2M-Origin': 'Tue_20_12_22:Tue_20_12_22',
+        'X-M2M-Origin': 'wdmon@20:gpod@llk4',
         'Content-Type': 'application/json;ty=4'
     }
     response = requests.post(url, headers=headers, data=payload)
@@ -55,7 +55,7 @@ def post_to_onem2m_w2(node_name, data, db, current_user):
         }
     })
     headers = {
-        'X-M2M-Origin': 'Tue_20_12_22:Tue_20_12_22',
+        'X-M2M-Origin': 'wdmon@20:gpod@llk4',
         'Content-Type': 'application/json;ty=4'
     }
     response = requests.post(url, headers=headers, data=payload)
