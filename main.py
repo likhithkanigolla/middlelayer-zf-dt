@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
@@ -14,6 +15,14 @@ app = FastAPI(
     title="Digital Twin API for Callibration",
     description="This layer and API's are used to callibrates the values and post them to the oneM2M",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Dependency
