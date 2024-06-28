@@ -61,7 +61,7 @@ def create_user(user: models.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@app.post("/forgotpassword/{username}", response_model=models.User, dependencies=[Depends(check_ip)])
+@app.put("/forgotpassword/{username}", response_model=models.User, dependencies=[Depends(check_ip)])
 def update_user_password(username: str, user: models.UserUpdate, db: Session = Depends(get_db)):
     """
     Update a user's password.
@@ -82,7 +82,7 @@ def update_user_password(username: str, user: models.UserUpdate, db: Session = D
     db.refresh(db_user)
     return db_user
 
-@app.post("deleteuser/{username}", response_model=models.User, dependencies=[Depends(check_ip)])
+@app.delete("/deleteuser/{username}", response_model=models.User, dependencies=[Depends(check_ip)])
 def delete_user(username: str, db: Session = Depends(get_db)):
     """
     Delete a user by username.
