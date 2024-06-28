@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
@@ -32,8 +32,17 @@ def get_db():
         yield db
     finally:
         db.close()
+        
+ALLOWED_IPS = ["127.0.0.1", "10.2.11.116"]
 
-@app.post("/users/", response_model=models.User)
+
+def check_ip(request: Request):
+    client_host = request.client.host
+    if client_host not in ALLOWED_IPS:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+
+@app.post("/users/", response_model=models.User, dependencies=[Depends(check_ip)])
 def create_user(user: models.UserCreate, db: Session = Depends(get_db)):
     """
     Create a new user.
