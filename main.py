@@ -61,6 +61,64 @@ def create_user(user: models.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
+@app.post("/forgotpassword/{username}", response_model=models.User, dependencies=[Depends(check_ip)])
+def update_user_password(username: str, user: models.UserUpdate, db: Session = Depends(get_db)):
+    """
+    Update a user's password.
+
+    Parameters:
+    - username (str): The username of the user.
+    - user (models.UserUpdate): The updated user data.
+    - db (Session): The database session.
+
+    Returns:
+    - models.User: The updated user.
+    """
+    db_user = db.query(User).filter(User.username == username).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    db_user.hashed_password = auth.get_password_hash(user.password)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.post("deleteuser/{username}", response_model=models.User, dependencies=[Depends(check_ip)])
+def delete_user(username: str, db: Session = Depends(get_db)):
+    """
+    Delete a user by username.
+
+    Parameters:
+    - username (str): The username of the user.
+    - db (Session): The database session.
+
+    Returns:
+    - models.User: The deleted user.
+    """
+    db_user = db.query(User).filter(User.username == username).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    db.delete(db_user)
+    db.commit()
+    return db_user
+
+@app.get("/users/", response_model=List[models.User])
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """
+    Get a list of users.
+
+    Parameters:
+    - skip (int): The number of users to skip.
+    - limit (int): The maximum number of users to return.
+    - db (Session): The database session.
+
+    Returns:
+    - List[models.User]: The list of users.
+    """
+    users = db.query(User).offset(skip).limit(limit).all()
+    return users
+
+
+
 @app.post("/token", response_model=dict)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """
