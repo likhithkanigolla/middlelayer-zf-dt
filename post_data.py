@@ -21,8 +21,12 @@ def post_to_onem2m_w1(node_name, data, db, current_user):
     data_list = [epoch_time,temperature,voltage,uncompensated_tds,compensated_tds]
     url = BACKEND_URL + "AE-WM/WM-WD/" + node_name + "/Data"
     data_list=str(data_list)
+    with open('./node-versions.json') as f:
+        versions = json.load(f)
+    version = versions.get(node_name, "Unknown")
     payload = json.dumps({
         "m2m:cin": {
+            "lbl": ["AE-WM-WD", node_name, version, "WM-WD-" + version],
             "con": data_list
         }
     })
@@ -49,8 +53,12 @@ def post_to_onem2m_w2(node_name, data, db, current_user):
     data_list = [epoch_time,temperature,voltage,uncompensated_tds,compensated_tds,turbudity,ph]  # Initialize the data list with some default values
     url = BACKEND_URL + "AE-WM/WM-WD/" + node_name + "/Data"
     data_list=str(data_list)
+    with open('./node-versions.json') as f:
+        versions = json.load(f)
+    version = versions.get(node_name, "Unknown")
     payload = json.dumps({
         "m2m:cin": {
+            "lbl": ["AE-WM-WD", node_name, version, "WM-WD-" + version],
             "con": data_list
         }
     })
